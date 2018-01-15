@@ -1,4 +1,5 @@
 import Test.HUnit
+import Data.List
 -- Нужно поставить библиотеку hunit:
 -- cabal install hunit
 
@@ -10,7 +11,7 @@ fun = undefined
 -- 2. fibs возвращает бесконечный список чисел Фибоначчи.
 -- (0.5 балла)
 fibs :: [Integer]
-fibs = fmap fib [0..] where 
+fibs = fmap fib [0..] where
   fib n = helper 0 1 n
   helper a b n | n == 0 = a
   helper a b n | n > 0 = helper b (a + b) (n - 1)
@@ -36,7 +37,7 @@ swap = undefined
 -- 5a. takeLast n xs возвращает последние n элементов списка xs.
 -- (0.5 балла)
 takeLast :: Int -> [a] -> [a]
-takeLast = undefined
+takeLast n l = reverse (take n $ reverse l)
 
 -- 5b. Решите задачу 5a так, чтобы она работала за O(1) по памяти, если считать первый аргумент фиксированным.
 --     Проверить количество потребляемой памяти можно следующим образом:
@@ -59,10 +60,10 @@ mapl = undefined
 -- 7. Напишите функции unlines и unwords, используя функцию intercalate.
 -- (1 балл)
 unlines' :: [String] -> String
-unlines' = undefined
+unlines' = intercalate "\n"
 
 unwords' :: [String] -> String
-unwords' = undefined
+unwords' = intercalate " "
 
 -- 8. Напишите аналоги функций lines и words, используя функцию mapl.
 --    Функция words' xs возвращает список слов в строке xs, которые были разделены (одним и более) пробельными символами.
