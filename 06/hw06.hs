@@ -8,25 +8,24 @@ import Test.HUnit
 data Complex = Complex { real :: Double, im :: Double } deriving (Show, Eq)
 
 fromDouble :: Double -> Complex
-fromDouble = undefined
+fromDouble d = Complex { real = d, im = 0}
 
--- Мнимая единица
 i :: Complex
-i = undefined
+i = Complex { real = 0, im = 1}
 
 infixl 6 +., -.
 (+.) :: Complex -> Complex -> Complex
-(+.) = undefined
+(+.) (Complex x1 y1) (Complex x2 y2) = Complex (x1 + x2) (y1 + y2)
 
 (-.) :: Complex -> Complex -> Complex
-(-.) = undefined
+(-.) (Complex x1 y1) (Complex x2 y2) = Complex (x1 - x2) (y1 - y2)
 
 infixl 7 *., /.
 (*.) :: Complex -> Complex -> Complex
-(*.) = undefined
+(*.) (Complex x1 y1) (Complex x2 y2) = Complex (x1 * x2 - y1 * y2) (x1 * y2 + x2 * y1)
 
 (/.) :: Complex -> Complex -> Complex
-(/.) = undefined
+(/.) (Complex x1 y1) (Complex x2 y2) = undefined
 
 conj :: Complex -> Complex
 conj = undefined
