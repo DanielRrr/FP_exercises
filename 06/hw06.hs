@@ -1,17 +1,16 @@
+module Hw06 where
+
 import qualified Data.Map as M
 import Prelude hiding (lookup)
 import Test.HUnit
 
-------------------------------------------------------------------------------
--- 1. Реализуйте функции для работы с комплекснми числами.
-
 data Complex = Complex { real :: Double, im :: Double } deriving (Show, Eq)
 
 fromDouble :: Double -> Complex
-fromDouble d = Complex { real = d, im = 0}
+fromDouble d = Complex d 0
 
 i :: Complex
-i = Complex { real = 0, im = 1}
+i = Complex 0 1
 
 infixl 6 +., -.
 (+.) :: Complex -> Complex -> Complex
@@ -25,12 +24,11 @@ infixl 7 *., /.
 (*.) (Complex x1 y1) (Complex x2 y2) = Complex (x1 * x2 - y1 * y2) (x1 * y2 + x2 * y1)
 
 (/.) :: Complex -> Complex -> Complex
-(/.) (Complex x1 y1) (Complex x2 y2) = undefined
+(/.) (Complex x1 y1) (Complex x2 y2) =
+      Complex ((x1 * x2 + y1 * y1)/(x2 * x2 + y2 * y2)) ((x2 * y1 - x1 * y2)/(x2 * x2 + y2 * y2))
 
 conj :: Complex -> Complex
-conj = undefined
-
--- tests
+conj (Complex a b) = Complex a (-b)
 
 testsComplex =
     [ i *. i ~?= fromDouble (-1)
@@ -41,17 +39,11 @@ testsComplex =
     , fromDouble 2 /. (fromDouble 1 +. i) ~?= fromDouble 1 -. i
     ]
 
-------------------------------------------------------------------------------
--- 2
-
 data Tree a = Node { value :: a, children :: [Tree a] }
 
--- (a) Возвращает высоту дерева
 height :: Tree a -> Int
-height = undefined
+height (Node x l) = maximum (fmap height l) + 1
 
--- (b) Возвращает среднее арифметическое значений во всех узлах дерева
--- Необходимо вычислить эту функцию, выполнив один проход по дереву
 avg :: Tree Int -> Int
 avg = undefined
 
