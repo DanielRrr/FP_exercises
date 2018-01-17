@@ -1,79 +1,51 @@
 import Test.HUnit
 import Data.List
--- Нужно поставить библиотеку hunit:
--- cabal install hunit
+import Data.Char
 
--- 1. fun четные числа в нечетных позициях (нумеруя с 0) умножает на 2, остальные не изменяет.
--- (0.5 балла)
 fun :: [Integer] -> [Integer]
-fun = undefined
+fun = \xs -> [ if odd x && even y then 2 * x else x | (x,y) <- zip [0..] xs]
 
--- 2. fibs возвращает бесконечный список чисел Фибоначчи.
--- (0.5 балла)
 fibs :: [Integer]
-fibs = fmap fib [0..] where
+fibs = fmap fib [1..] where
   fib n = helper 0 1 n
   helper a b n | n == 0 = a
   helper a b n | n > 0 = helper b (a + b) (n - 1)
   helper a b n | n < 0 = helper b (a - b) (n + 1)
 
--- 3a. isPrime проверяет простоту числа.
--- (0.5 балла)
 isPrime :: Integer -> Bool
-isPrime = undefined
+isPrime 1 = False
+isPrime n = null [x | x <- [2..n-1], n `mod` x == 0]
 
--- 3b. primes возвращает бесконечный список простых чисел.
--- (0.5 балла)
 primes :: [Integer]
-primes = undefined
+primes = filter isPrime [2..]
 
 -- 4. swap i j меняет местами i и j элементы.
 --    Эта функция должна работать для бесконечных списков.
 --    Напишите эффективную реализацию, что, в частности, означает, что нельзя использовать (!!).
 -- (1.5 балла)
 swap :: Int -> Int -> [a] -> [a]
-swap = undefined
+swap n m xs = undefined
 
--- 5a. takeLast n xs возвращает последние n элементов списка xs.
--- (0.5 балла)
 takeLast :: Int -> [a] -> [a]
 takeLast n l = reverse (take n $ reverse l)
 
--- 5b. Решите задачу 5a так, чтобы она работала за O(1) по памяти, если считать первый аргумент фиксированным.
---     Проверить количество потребляемой памяти можно следующим образом:
---     1. Создаем файл, где пишем функцию takeLast и следующую функцию main:
---        main = length (takeLast 20 [1..10000000]) `seq` return ()
---     2. Компилируем ghc -O2 TakeLast.hs
---     3. Запускаем ./TakeLast +RTS -s.
---     4. Смотрим на графу maximum residency.
---     5. Меняем число 10000000, смотрим как меняется потребление памяти.
--- (2.5 балла)
-
--- 6. Назовем элементы, которые удовлетворяют предикату p хорошими, остальные плохими.
--- Тогда mapl p f xs выбрасывает плохие элементы, а блоки подряд идущих хороших элементов,
--- которые разделяются плохими, отправляет в функцию f и возвращает список результатов.
--- Заметьте, что в функцию f никогда не передаются пустые списки.
--- (1 балл)
 mapl :: (a -> Bool) -> ([a] -> b) -> [a] -> [b]
-mapl = undefined
+mapl prop f l = case span prop l of
+  ([],[]) -> []
+  ([],y:ys) -> mapl prop f ys
+  (xs,ys) -> f xs : mapl prop f ys
 
--- 7. Напишите функции unlines и unwords, используя функцию intercalate.
--- (1 балл)
 unlines' :: [String] -> String
 unlines' = intercalate "\n"
 
 unwords' :: [String] -> String
 unwords' = intercalate " "
 
--- 8. Напишите аналоги функций lines и words, используя функцию mapl.
---    Функция words' xs возвращает список слов в строке xs, которые были разделены (одним и более) пробельными символами.
---    Функция lines' работает аналогично, но разделяются слова по символам перевода строки.
--- (1 балл)
 lines' :: String -> [String]
-lines' = undefined
+lines' = mapl (/= '\n') id
 
 words' :: String -> [String]
-words' = undefined
+words' = mapl (not . isSpace) id
 
 main = fmap (\_ -> ()) $ runTestTT $ test
     $    label "fun"
