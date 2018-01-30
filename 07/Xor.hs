@@ -2,10 +2,10 @@ module Xor where
 
 import Data.Monoid
 
--- Определите instance Monoid для Bool так, чтобы mappend реализовывал операцию xor.
-
 newtype Xor = Xor { getXor :: Bool } deriving (Eq,Show)
 
 instance Monoid Xor where
-    mempty = undefined
-    mappend = undefined
+    mempty = Xor False
+    mappend = (\x y -> Xor (x `xor` y))
+      where
+        xor a b = (a || b) && not (a && b)
