@@ -30,5 +30,7 @@ instance Monoid a => Monoid (Maybe1 a) where
 newtype Maybe2 a = Maybe2 { getMaybe2 :: Maybe a } deriving (Eq,Show)
 
 instance (Monoid a, Eq a) => Monoid (Maybe2 a) where
-    mempty = undefined
-    mappend = undefined
+    mempty = Maybe2 (Just mempty)
+    mappend (Maybe2 Nothing) _ = (Maybe2 Nothing)
+    mappend _ (Maybe2 Nothing) = Maybe2 Nothing
+    mappend (Maybe2 x) (Maybe2 y) = if x == Just mempty then (Maybe2 y) else (Maybe2 x)
