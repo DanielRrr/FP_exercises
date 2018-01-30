@@ -28,4 +28,4 @@ instance Read Complex where
     readsPrec = undefined
 
 i :: Complex
-i = undefined
+i = Complex 0 1

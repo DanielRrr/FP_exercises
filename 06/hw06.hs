@@ -195,20 +195,36 @@ testsExpr = [ errorsCount (evalExpr M.empty expr1) ~?= 1
 
 data Map k v = Leaf | Branch k v (Map k v) (Map k v)
 
+empty :: Map k v
+empty = Leaf
+
+
 lookup :: Ord k => k -> Map k v -> Maybe v
-lookup = undefined
+lookup key Leaf = Nothing
+lookup key (Branch x y left right) = case compare key x of
+                                      LT -> lookup key left
+                                      EQ -> Just y
+                                      GT -> lookup key right
 
 insert :: Ord k => k -> v -> Map k v -> (Map k v, Maybe v)
-insert = undefined
+insert key value m = (insert' key value m, lookup key m)
+      where
+        insert' key value Leaf = Branch key value Leaf Leaf
+        insert' key value (Branch x y left right) = case compare key x of
+                                                      EQ -> Branch key value left right
+                                                      LT -> Branch key value (insert' key value left) right
+                                                      GT -> Branch key value left (insert' key value right)
 
 delete :: Ord k => k -> Map k v -> Maybe (Map k v)
 delete = undefined
 
 fromList :: Ord k => [(k, v)] -> Map k v
-fromList = undefined
+fromList [] = Leaf
+fromList (x:xs) = undefined
 
 toList :: Map k v -> [(k, v)]
-toList = undefined
+toList Leaf = []
+toList (Branch key value left right) = toList left ++ [(key, value)] ++ toList right
 
 -- tests
 
