@@ -17,22 +17,28 @@ newtype Parser lex a = Parser { runParser :: [lex] -> Maybe ([lex],a) }
 
 -- Если парсер p не поглащает весь список, то parse должен возвращать Nothing
 parse :: Parser lex a -> [lex] -> Maybe a
-parse = undefined
+parse p xs = snd <$> runParser p xs
 
 satisfy :: (lex -> Bool) -> Parser lex lex
-satisfy = undefined
+satisfy p = Parser checkHead where
+  checkHead [] = Nothing
+  checkHead (x:xs) = case p x of
+    False -> Nothing
+    True -> Just (xs,x)
 
 eof :: Parser lex ()
-eof = undefined
+eof = Parser checkUnit where
+  checkUnit x = case x of [] -> Just ([],())
+                          _  -> Nothing
 
 instance Functor (Parser lex) where
     fmap f = Parser . fmap (fmap (fmap f)) . runParser
 
 instance Applicative (Parser lex) where
-    pure = undefined
+    pure x = Parser $ (\lexes -> Just (lexes,x))
     Parser f <*> Parser a = Parser $ \lexs -> case f lexs of
         Nothing -> Nothing
-        Just (lexs', f') -> _ -- fmap (fmap f') (a lexs')
+        Just (lexs', f') -> undefined
 
 instance Alternative (Parser lex) where
     empty = undefined
