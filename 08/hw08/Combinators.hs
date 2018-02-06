@@ -16,17 +16,17 @@ import Data.Char
 
 -- Поведение всех комбинаторов описано в тестах в Main.hs.
 
-symbol :: lex -> Parser lex ()
-symbol = undefined
+symbol :: Eq lex => lex -> Parser lex ()
+symbol l = () <$ satisfy (== l)
 
 anySymbol :: Parser lex lex
-anySymbol = undefined
+anySymbol = satisfy (const True)
 
 digit :: Parser Char Int
-digit = undefined
+digit = digitToInt <$> satisfy isDigit
 
-string :: [lex] -> Parser lex ()
-string = undefined
+string :: Eq lex => [lex] -> Parser lex ()
+string = foldr ((*>) . symbol) (pure ())
 
 oneOf :: [lex] -> Parser lex lex
 oneOf = undefined
