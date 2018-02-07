@@ -46,7 +46,7 @@ module StoreLens (
 
 import Control.Applicative(Applicative((<*>)))
 import Data.Char(toUpper)
-import Data.Functor((<$>))
+import Data.Functor
 import Data.Map(Map)
 import qualified Data.Map as Map(insert, delete, lookup)
 import Data.Set(Set)
@@ -114,10 +114,7 @@ infixr 4 %~
 infixl 5 .~
 
 fmodify :: Functor f => Lens a b -> (b -> f b) -> a -> f a
-fmodify = undefined
-
---
-
+fmodify lens f target = f ((get lens) target) $> target
 
 infixl 5 |=
 
@@ -131,87 +128,32 @@ fstL = Lens (\p -> Store (\ x -> (x, snd p)) (fst p))
 sndL :: Lens (x, y) y
 sndL = Lens (\p -> Store (\ y -> (fst p, y)) (snd p))
 
--- |
---
--- >>> get (mapL 3) (Map.fromList (map (\c -> (ord c - 96, c)) ['a'..'d']))
--- Just 'c'
---
--- >>> get (mapL 33) (Map.fromList (map (\c -> (ord c - 96, c)) ['a'..'d']))
--- Nothing
---
--- >>> set (mapL 3) (Map.fromList (map (\c -> (ord c - 96, c)) ['a'..'d'])) (Just 'X')
--- fromList [(1,'a'),(2,'b'),(3,'X'),(4,'d')]
---
--- >>> set (mapL 33) (Map.fromList (map (\c -> (ord c - 96, c)) ['a'..'d'])) (Just 'X')
--- fromList [(1,'a'),(2,'b'),(3,'c'),(4,'d'),(33,'X')]
---
--- >>> set (mapL 3) (Map.fromList (map (\c -> (ord c - 96, c)) ['a'..'d'])) Nothing
--- fromList [(1,'a'),(2,'b'),(4,'d')]
---
--- >>> set (mapL 33) (Map.fromList (map (\c -> (ord c - 96, c)) ['a'..'d'])) Nothing
--- fromList [(1,'a'),(2,'b'),(3,'c'),(4,'d')]
 mapL :: Ord k => k -> Lens (Map k v) (Maybe v)
-mapL = error "todo: mapL"
+mapL key = Lens (\ kv -> Store ( \val -> case val of
+    Nothing -> Map.delete key kv
+    Just x -> Map.insert key x kv
+    ) (Map.lookup key kv))
 
--- |
---
--- >>> get (setL 3) (Set.fromList [1..5])
--- True
---
--- >>> get (setL 33) (Set.fromList [1..5])
--- False
---
--- >>> set (setL 3) (Set.fromList [1..5]) True
--- fromList [1,2,3,4,5]
---
--- >>> set (setL 3) (Set.fromList [1..5]) False
--- fromList [1,2,4,5]
---
--- >>> set (setL 33) (Set.fromList [1..5]) True
--- fromList [1,2,3,4,5,33]
---
--- >>> set (setL 33) (Set.fromList [1..5]) False
--- fromList [1,2,3,4,5]
 setL :: Ord k => k -> Lens (Set k) Bool
-setL = error "todo: setL"
+setL key = Lens (\set -> Store (\b -> case b of
+    False -> Set.delete key set
+    True -> Set.insert key set
+  ) (Set.member key set))
 
--- |
---
--- >>> get (compose fstL sndL) ("abc", (7, "def"))
--- 7
---
--- >>> set (compose fstL sndL) ("abc", (7, "def")) 8
--- ("abc",(8,"def"))
 compose :: Lens b c -> Lens a b -> Lens a c
-compose = error "todo: compose"
+compose f g = Lens (\x -> Store (((set g) x) . (set f) (get g x)) ((get f . get g) $ x))
 
--- | An alias for @compose@.
 (|.) :: Lens b c -> Lens a b -> Lens a c
 (|.) = compose
 
 infixr 9 |.
 
--- |
---
--- >>> get identity 3
--- 3
---
--- >>> set identity 3 4
--- 4
 identity :: Lens a a
 identity = Lens (\x -> Store id x)
 
--- |
---
--- >>> get (product fstL sndL) (("abc", 3), (4, "def"))
--- ("abc","def")
---
--- >>> set (product fstL sndL) (("abc", 3), (4, "def")) ("ghi", "jkl")
--- (("ghi",3),(4,"jkl"))
 product :: Lens a b -> Lens c d -> Lens (a, c) (b, d)
 product l1 l2 = undefined
 
--- | An alias for @product@.
 (***) :: Lens a b -> Lens c d -> Lens (a, c) (b, d)
 (***) = product
 
@@ -230,66 +172,34 @@ infixr 3 ***
 --
 -- >>> set (choice fstL sndL) (Right ("abc", 7)) 8
 -- Right ("abc",8)
-choice ::
-  Lens a x
-  -> Lens b x
-  -> Lens (Either a b) x
-choice =
-  error "todo: choice"
+choice :: Lens a x -> Lens b x -> Lens (Either a b) x
+choice = error "todo: choice"
 
 -- | An alias for @choice@.
-(|||) ::
-  Lens a x
-  -> Lens b x
-  -> Lens (Either a b) x
-(|||) =
-  choice
+(|||) :: Lens a x -> Lens b x -> Lens (Either a b) x
+(|||) = choice
 
 infixr 2 |||
 
 ----
 
-cityL ::
-  Lens Locality String
-cityL =
-  Lens
-    (\(Locality c t y) ->
-      Store (\c' -> Locality c' t y) c)
+cityL :: Lens Locality String
+cityL = Lens (\(Locality c t y) -> Store (\c' -> Locality c' t y) c)
 
-stateL ::
-  Lens Locality String
-stateL =
-  Lens
-    (\(Locality c t y) ->
-      Store (\t' -> Locality c t' y) t)
+stateL :: Lens Locality String
+stateL = Lens (\(Locality c t y) -> Store (\t' -> Locality c t' y) t)
 
-countryL ::
-  Lens Locality String
-countryL =
-  Lens
-    (\(Locality c t y) ->
-      Store (\y' -> Locality c t y') y)
+countryL :: Lens Locality String
+countryL = Lens (\(Locality c t y) -> Store (\y' -> Locality c t y') y)
 
-streetL ::
-  Lens Address String
-streetL =
-  Lens
-    (\(Address t s l) ->
-      Store (\t' -> Address t' s l) t)
+streetL :: Lens Address String
+streetL = Lens (\(Address t s l) -> Store (\t' -> Address t' s l) t)
 
-suburbL ::
-  Lens Address String
-suburbL =
-  Lens
-    (\(Address t s l) ->
-      Store (\s' -> Address t s' l) s)
+suburbL :: Lens Address String
+suburbL = Lens (\(Address t s l) -> Store (\s' -> Address t s' l) s)
 
-localityL ::
-  Lens Address Locality
-localityL =
-  Lens
-    (\(Address t s l) ->
-      Store (\l' -> Address t s l') l)
+localityL :: Lens Address Locality
+localityL = Lens (\(Address t s l) -> Store (\l' -> Address t s l') l)
 
 ageL ::
   Lens Person Int
