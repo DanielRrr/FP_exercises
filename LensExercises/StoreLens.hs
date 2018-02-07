@@ -53,6 +53,7 @@ import Data.Set(Set)
 import qualified Data.Set as Set(insert, delete, member)
 import First(Store(Store), Person(Person), Locality(Locality), Address(Address), bool)
 import Prelude hiding (product)
+import Control.Comonad
 
 
 setS :: Store s a -> s -> a
@@ -72,6 +73,13 @@ extendS f (Store f' x') = Store (f . (Store f')) x'
 
 extractS :: Store s a -> a
 extractS (Store g x) = g x
+
+instance Functor (Store s) where
+  fmap = mapS
+
+instance Comonad (Store s) where
+  extend = extendS
+  extract = extractS
 
 ----
 
@@ -201,16 +209,11 @@ identity = Lens (\x -> Store id x)
 -- >>> set (product fstL sndL) (("abc", 3), (4, "def")) ("ghi", "jkl")
 -- (("ghi",3),(4,"jkl"))
 product :: Lens a b -> Lens c d -> Lens (a, c) (b, d)
-product =
-  error "todo: product"
+product l1 l2 = undefined
 
 -- | An alias for @product@.
-(***) ::
-  Lens a b
-  -> Lens c d
-  -> Lens (a, c) (b, d)
-(***) =
-  product
+(***) :: Lens a b -> Lens c d -> Lens (a, c) (b, d)
+(***) = product
 
 infixr 3 ***
 
