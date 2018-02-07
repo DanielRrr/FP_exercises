@@ -151,37 +151,31 @@ infixr 9 |.
 identity :: Lens a a
 identity = Lens (\x -> Store id x)
 
+uniprod :: (a -> b) -> (c -> d) -> (a,c) -> (b,d)
+uniprod f g (x,y) = (f x, g y)
+
 product :: Lens a b -> Lens c d -> Lens (a, c) (b, d)
-product l1 l2 = undefined
+product l1 l2 = Lens
+                  (\x -> Store
+                    (\p ->
+                      ((set l1) (fst x) (fst p), (set l2) (snd x) (snd p)) )
+                        (uniprod (get l1) (get l2) x))
 
 (***) :: Lens a b -> Lens c d -> Lens (a, c) (b, d)
 (***) = product
 
 infixr 3 ***
 
--- |
---
--- >>> get (choice fstL sndL) (Left ("abc", 7))
--- "abc"
---
--- >>> get (choice fstL sndL) (Right ("abc", 7))
--- 7
---
--- >>> set (choice fstL sndL) (Left ("abc", 7)) "def"
--- Left ("def",7)
---
--- >>> set (choice fstL sndL) (Right ("abc", 7)) 8
--- Right ("abc",8)
-choice :: Lens a x -> Lens b x -> Lens (Either a b) x
-choice = error "todo: choice"
+choice :: Lens a c -> Lens b c -> Lens (Either a b) c
+choice l1 l2 = Lens (\d -> Store (\e -> case d of
+                    Left x -> Left (set l1 x e)
+                    Right y -> Right (set l2 y e)
+                    ) (either (get l1) (get l2) d))
 
--- | An alias for @choice@.
 (|||) :: Lens a x -> Lens b x -> Lens (Either a b) x
 (|||) = choice
 
 infixr 2 |||
-
-----
 
 cityL :: Lens Locality String
 cityL = Lens (\(Locality c t y) -> Store (\c' -> Locality c' t y) c)
@@ -201,26 +195,14 @@ suburbL = Lens (\(Address t s l) -> Store (\s' -> Address t s' l) s)
 localityL :: Lens Address Locality
 localityL = Lens (\(Address t s l) -> Store (\l' -> Address t s l') l)
 
-ageL ::
-  Lens Person Int
-ageL =
-  Lens
-    (\(Person a n d) ->
-      Store (\a' -> Person a' n d) a)
+ageL :: Lens Person Int
+ageL = Lens (\(Person a n d) -> Store (\a' -> Person a' n d) a)
 
-nameL ::
-  Lens Person String
-nameL =
-  Lens
-    (\(Person a n d) ->
-      Store (\n' -> Person a n' d) n)
+nameL :: Lens Person String
+nameL = Lens (\(Person a n d) -> Store (\n' -> Person a n' d) n)
 
-addressL ::
-  Lens Person Address
-addressL =
-  Lens
-    (\(Person a n d) ->
-    Store (\d' -> Person a n d') d)
+addressL :: Lens Person Address
+addressL = Lens (\(Person a n d) -> Store (\d' -> Person a n d') d)
 
 -- |
 --
@@ -229,11 +211,8 @@ addressL =
 --
 -- >>> getSuburb mary
 -- "Maryland"
-getSuburb ::
-  Person
-  -> String
-getSuburb =
-  error "todo: getSuburb"
+getSuburb :: Person -> String
+getSuburb = error "todo: getSuburb"
 
 -- |
 --
@@ -242,12 +221,8 @@ getSuburb =
 --
 -- >>> setStreet mary "Some Other St"
 -- Person 28 "Mary" (Address "Some Other St" "Maryland" (Locality "Mary Mary" "Western Mary" "Maristan"))
-setStreet ::
-  Person
-  -> String
-  -> Person
-setStreet =
-  error "todo: setStreet"
+setStreet :: Person -> String -> Person
+setStreet = error "todo: setStreet"
 
 -- |
 --
@@ -256,9 +231,7 @@ setStreet =
 --
 -- >>> getAgeAndCountry (mary, fredLocality)
 -- (28,"Fredalia")
-getAgeAndCountry ::
-  (Person, Locality)
-  -> (Int, String)
+getAgeAndCountry :: (Person, Locality) -> (Int, String)
 getAgeAndCountry =
   error "todo: getAgeAndCountry"
 
@@ -269,10 +242,8 @@ getAgeAndCountry =
 --
 -- >>> setCityAndLocality (mary, fredAddress) ("Some Other City", maryLocality)
 -- (Person 28 "Mary" (Address "83 Mary Ln" "Maryland" (Locality "Some Other City" "Western Mary" "Maristan")),Address "15 Fred St" "Fredville" (Locality "Mary Mary" "Western Mary" "Maristan"))
-setCityAndLocality ::
-  (Person, Address) -> (String, Locality) -> (Person, Address)
-setCityAndLocality =
-  error "todo: setCityAndLocality"
+setCityAndLocality :: (Person, Address) -> (String, Locality) -> (Person, Address)
+setCityAndLocality = error "todo: setCityAndLocality"
 
 -- |
 --
@@ -281,11 +252,8 @@ setCityAndLocality =
 --
 -- >>> getSuburbOrCity (Right fredLocality)
 -- "Fredmania"
-getSuburbOrCity ::
-  Either Address Locality
-  -> String
-getSuburbOrCity =
-  error "todo: getSuburbOrCity"
+getSuburbOrCity :: Either Address Locality -> String
+getSuburbOrCity = error "todo: getSuburbOrCity"
 
 -- |
 --
@@ -294,12 +262,8 @@ getSuburbOrCity =
 --
 -- >>> setStreetOrState (Left fred) "Some Other St"
 -- Left (Person 24 "Fred" (Address "Some Other St" "Fredville" (Locality "Fredmania" "New South Fred" "Fredalia")))
-setStreetOrState ::
-  Either Person Locality
-  -> String
-  -> Either Person Locality
-setStreetOrState =
-  error "todo: setStreetOrState"
+setStreetOrState :: Either Person Locality -> String -> Either Person Locality
+setStreetOrState = error "todo: setStreetOrState"
 
 -- |
 --
@@ -308,8 +272,5 @@ setStreetOrState =
 --
 -- >>> modifyCityUppercase mary
 -- Person 28 "Mary" (Address "83 Mary Ln" "Maryland" (Locality "MARY MARY" "Western Mary" "Maristan"))
-modifyCityUppercase ::
-  Person
-  -> Person
-modifyCityUppercase =
-  error "todo: modifyCityUppercase"
+modifyCityUppercase :: Person -> Person
+modifyCityUppercase = error "todo: modifyCityUppercase"
