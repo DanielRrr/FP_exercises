@@ -1,4 +1,4 @@
-module Lets.Profunctor (
+module Profunctor (
   Profunctor(dimap)
 ) where
 

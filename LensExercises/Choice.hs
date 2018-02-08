@@ -9,8 +9,6 @@ diswap ::
   Profunctor p => p (Either a b) (Either c d) -> p (Either b a) (Either d c)
 diswap = let swap = either Right Left in dimap swap swap
 
--- | Map on left or right of @Either@. Only one of @left@ or @right@ needs to be
--- provided.
 class Profunctor p => Choice p where
   left :: p a b -> p (Either a c) (Either b c)
   left = diswap . right
