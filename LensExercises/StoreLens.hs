@@ -204,73 +204,23 @@ nameL = Lens (\(Person a n d) -> Store (\n' -> Person a n' d) n)
 addressL :: Lens Person Address
 addressL = Lens (\(Person a n d) -> Store (\d' -> Person a n d') d)
 
--- |
---
--- >>> getSuburb fred
--- "Fredville"
---
--- >>> getSuburb mary
--- "Maryland"
 getSuburb :: Person -> String
-getSuburb = error "todo: getSuburb"
+getSuburb = get $ suburbL |. addressL
 
--- |
---
--- >>> setStreet fred "Some Other St"
--- Person 24 "Fred" (Address "Some Other St" "Fredville" (Locality "Fredmania" "New South Fred" "Fredalia"))
---
--- >>> setStreet mary "Some Other St"
--- Person 28 "Mary" (Address "Some Other St" "Maryland" (Locality "Mary Mary" "Western Mary" "Maristan"))
 setStreet :: Person -> String -> Person
-setStreet = error "todo: setStreet"
+setStreet = set $ streetL |. addressL
 
--- |
---
--- >>> getAgeAndCountry (fred, maryLocality)
--- (24,"Maristan")
---
--- >>> getAgeAndCountry (mary, fredLocality)
--- (28,"Fredalia")
 getAgeAndCountry :: (Person, Locality) -> (Int, String)
-getAgeAndCountry =
-  error "todo: getAgeAndCountry"
+getAgeAndCountry = get $ ageL *** countryL
 
--- |
---
--- >>> setCityAndLocality (fred, maryAddress) ("Some Other City", fredLocality)
--- (Person 24 "Fred" (Address "15 Fred St" "Fredville" (Locality "Some Other City" "New South Fred" "Fredalia")),Address "83 Mary Ln" "Maryland" (Locality "Fredmania" "New South Fred" "Fredalia"))
---
--- >>> setCityAndLocality (mary, fredAddress) ("Some Other City", maryLocality)
--- (Person 28 "Mary" (Address "83 Mary Ln" "Maryland" (Locality "Some Other City" "Western Mary" "Maristan")),Address "15 Fred St" "Fredville" (Locality "Mary Mary" "Western Mary" "Maristan"))
 setCityAndLocality :: (Person, Address) -> (String, Locality) -> (Person, Address)
-setCityAndLocality = error "todo: setCityAndLocality"
+setCityAndLocality = set $ (cityL |. localityL |. addressL) *** localityL
 
--- |
---
--- >>> getSuburbOrCity (Left maryAddress)
--- "Maryland"
---
--- >>> getSuburbOrCity (Right fredLocality)
--- "Fredmania"
 getSuburbOrCity :: Either Address Locality -> String
-getSuburbOrCity = error "todo: getSuburbOrCity"
+getSuburbOrCity = get $ suburbL ||| cityL
 
--- |
---
--- >>> setStreetOrState (Right maryLocality) "Some Other State"
--- Right (Locality "Mary Mary" "Some Other State" "Maristan")
---
--- >>> setStreetOrState (Left fred) "Some Other St"
--- Left (Person 24 "Fred" (Address "Some Other St" "Fredville" (Locality "Fredmania" "New South Fred" "Fredalia")))
 setStreetOrState :: Either Person Locality -> String -> Either Person Locality
-setStreetOrState = error "todo: setStreetOrState"
+setStreetOrState = undefined
 
--- |
---
--- >>> modifyCityUppercase fred
--- Person 24 "Fred" (Address "15 Fred St" "Fredville" (Locality "FREDMANIA" "New South Fred" "Fredalia"))
---
--- >>> modifyCityUppercase mary
--- Person 28 "Mary" (Address "83 Mary Ln" "Maryland" (Locality "MARY MARY" "Western Mary" "Maristan"))
 modifyCityUppercase :: Person -> Person
-modifyCityUppercase = error "todo: modifyCityUppercase"
+modifyCityUppercase = undefined
